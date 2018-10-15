@@ -1,0 +1,9 @@
+home=/homed/liaoxingyu/EV_Assembly
+DataSetName=ecoli_mda_lane8
+lib1_left_name=ecoli_mda_lane8.1
+lib1_right_name=ecoli_mda_lane8.2
+Read_Length=100
+InsertLength1=266
+Sd_insert=25
+ReferenceName=/homee/liaoxingyu/EPGA-SC/Reference/EcoliCompleteReference.fasta
+dsk_bin=/home/liaoxingyu/ClusterTool/dsk-2.1.0-Linux/bin
