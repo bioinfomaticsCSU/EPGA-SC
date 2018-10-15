@@ -37,6 +37,8 @@ When running EPGA-SC from GitHub source the following tools are
 required:
 * [jdk.1.8.0](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 * [dsk.2.1.0](http://minia.genouest.org/dsk/)
+* [samtools-1.3.1](http://samtools.sourceforge.net/)
+* [bwa-0.7.15](http://maq.sourceforge.net)
 * [karect.1.0](http://aminallam.github.io/karect/)
 * [SPAdes.3.12.0](http://cab.spbu.ru/software/spades/)
 * [EPGA](https://github.com/bioinfomaticsCSU/EPGA)
@@ -47,11 +49,15 @@ required:
 
 The user can modify the system environment variables with the following commands:
 
-vim /etc/profile
+vi /etc/profile
 
-export JAVA_HOME="/usr/local/jdk1.8.0_20/bin"
+export JAVA_HOME=/usr/local/jdk1.8.0_20/bin
 
-export DSK_HOME="/home/.../dsk-2.1.0-Linux/bin"
+export DSK_HOME=/home/.../dsk-2.1.0-Linux/bin
+
+export Samtools_HOME=/home/.../samtools-1.3.1
+
+export BWA_HOME=/home/.../bwa-0.7.15
 
 export karet_HOME=/home/.../karect
 
@@ -63,7 +69,7 @@ export MUMmer_HOME=/home/.../mummer-4.0/bin
 
 export Quast_HOME=/home/.../quast-4.3
 
-export PATH="$JAVA_HOME:$DSK_HOME:$karet_HOME:$SPAdes_HOME:$EPGA_HOME:$MUMmer_HOME:$Quast_HOME:$PATH"
+export PATH="$JAVA_HOME:$DSK_HOME:$Samtools_HOME:$BWA_HOME:$karet_HOME:$SPAdes_HOME:$EPGA_HOME:$MUMmer_HOME:$Quast_HOME:$PATH"
 
 source /etc/profile
  
