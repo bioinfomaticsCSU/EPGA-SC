@@ -40,6 +40,7 @@ required:
 * [karect.1.0](http://aminallam.github.io/karect/)
 * [SPAdes.3.12.0](http://cab.spbu.ru/software/spades/)
 * [EPGA](https://github.com/bioinfomaticsCSU/EPGA)
+* [mummer-4.0](https://mummer4.github.io/index.html)
 * [quast.4.3](https://sourceforge.net/projects/quast/files/)
 
 ### Add system environment variables
@@ -49,12 +50,20 @@ The user can modify the system environment variables with the following commands
 vim /etc/profile
 
 export JAVA_HOME="/usr/local/jdk1.8.0_20/bin"
+
 export DSK_HOME="/home/.../dsk-2.1.0-Linux/bin"
+
 export karet_HOME=/home/.../karect
+
 export SPAdes_HOME=/home/.../SPAdes-3.12.0-Linux/bin
+
 export EPGA_HOME=/home/.../EPGA-master
 
-export PATH="$JAVA_HOME:$DSK_HOME:$karet_HOME:$SPAdes_HOME:$EPGA_HOME:$PATH"
+export MUMmer_HOME=/home/.../mummer-4.0/bin
+
+export Quast_HOME=/home/.../quast-4.3
+
+export PATH="$JAVA_HOME:$DSK_HOME:$karet_HOME:$SPAdes_HOME:$EPGA_HOME:$MUMmer_HOME:$Quast_HOME:$PATH"
 
 source /etc/profile
  
@@ -125,6 +134,7 @@ Thus, installation is not required.
 	(1)The final assemblies.
     
         /home/.../EPGA-SC/Final_Assemblies/$DataSetName/Contigs.fa
+		
 		/home/.../EPGA-SC/Final_Assemblies/$DataSetName/Scaffolds.fa
 
 	(2)The quast evalutions of the final assemblies.
