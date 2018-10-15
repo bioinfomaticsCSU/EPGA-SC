@@ -31,18 +31,19 @@ CHINA, 410083
 Installation and operation of EPGA-SC 
 ==================================
 
-1)Dependencies
+### Dependencies
 
 When running EPGA-SC from GitHub source the following tools are
 required:
 * [jdk.1.8.0](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 * [dsk.2.1.0](http://minia.genouest.org/dsk/)
-* [karect.1.0] (http://aminallam.github.io/karect/)
-* [SPAdes.3.12.0] (http://cab.spbu.ru/software/spades/)
-* [EPGA] (https://github.com/bioinfomaticsCSU/EPGA)
+* [karect.1.0](http://aminallam.github.io/karect/)
+* [SPAdes.3.12.0](http://cab.spbu.ru/software/spades/)
+* [EPGA](https://github.com/bioinfomaticsCSU/EPGA)
 * [quast.4.3](https://sourceforge.net/projects/quast/files/)
 
-2) Add system environment variables
+### Add system environment variables
+
 The user can modify the system environment variables with the following commands:
 
 vim /etc/profile
@@ -57,27 +58,25 @@ export PATH="$JAVA_HOME:$DSK_HOME:$karet_HOME:$SPAdes_HOME:$EPGA_HOME:$PATH"
 
 source /etc/profile
  
-3)Install EPGA-SC
+### Install EPGA-SC
 
 EPGA-SC automatically compiles all its sub-parts when needed (on the first use). 
 Thus, installation is not required.
 
-4)Run EPGA-SC.
+### Run EPGA-SC.
 
-### Loading library files to the working directory of EPGA-SC.
-    
-	#### Before running EPGA-SC, we need to load the library files into lib folder under the working directory of EPGA-SC(/home/.../EPGA-SC/lib/).
+    (1)Loading library files to the working directory of EPGA-SC. Before running EPGA-SC, we need to load the library files into lib folder under the working directory of EPGA-SC(/home/.../EPGA-SC/lib/).
 	
 	For example:
 	
 	cp /home/.../ecoli_mda_lane8.1.fastq  /home/.../EPGA-SC/lib/  ('ecoli_mda_lane8.1.fastq' is the left mate reads of the library)
 	cp /home/.../ecoli_mda_lane8.2.fastq  /home/.../EPGA-SC/lib/  ('ecoli_mda_lane8.2.fastq' is the right mate reads of the library)
 	
-	#### Note that the naming prefix of the paired-end reads files is consistent with the name of the dataset (The value of variable 'DataSetName').
+	(2)Note that the naming prefix of the paired-end reads files is consistent with the name of the dataset (The value of variable 'DataSetName').
 	
 	For example:
 	
-	#### The library is composed of paired-end reads('ecoli_mda_lane8.1.fastq' and 'ecoli_mda_lane8.2.fastq'), and the value of DataSetName is 'ecoli_mda_lane8'.
+	The library is composed of paired-end reads('ecoli_mda_lane8.1.fastq' and 'ecoli_mda_lane8.2.fastq'), and the value of DataSetName is 'ecoli_mda_lane8'.
 	
 	DataSetName=ecoli_mda_lane8
     lib1_left_name=ecoli_mda_lane8.1
@@ -121,13 +120,13 @@ Thus, installation is not required.
 	cd EPGA-SC
 	./run.sh
 
-5)Output.
+### Output.
     
-	### The final assemblies.
+	(1)The final assemblies.
     
         /home/.../EPGA-SC/Final_Assemblies/$DataSetName/Contigs.fa
 		/home/.../EPGA-SC/Final_Assemblies/$DataSetName/Scaffolds.fa
 
-	### The quast evalutions of the final assemblies.
+	(2)The quast evalutions of the final assemblies.
 
 	    /homee/.../EPGA-SC/Quast/$DataSetName/
