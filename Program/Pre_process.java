@@ -8,10 +8,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -1252,14 +1250,12 @@ class RemoveTechSeqByMultipleThreads implements Callable<Object> {
 					break;
 				}
 			}
-			/*
 			//Output Process rate.
 			if (i % 10000 == 0) {
 				System.out.println("Remove-rate:" + Thread.currentThread().getName() + "->"
 						+ CommonClass.Changeformat(100 * ((double) RemoveRate / SplitSize)) + "%");
 			}
 			RemoveRate++;
-			*/
 		}
 		return "The thread:" + Index + "->running completed!";
 	}
@@ -1467,8 +1463,7 @@ class ReplaceIncludedEPGAcontigs {
 		int RealSizeSPAdescontig = CommonClass.FastaToArray(SPAdescontigFile, SPAdescontigArray);
 		System.out.println("The real size of SPAdes assembly is:" + RealSizeSPAdescontig);
 		//Process.
-		//Set<Integer> hashSet = new HashSet<Integer>();
-		List<Integer> hashSet = new ArrayList<Integer>();
+		Set<Integer> hashSet = new HashSet<Integer>();
 		for (int w = 4; w < RealSizeMUMmer; w++) 
 		{
 			String[] SplitLine1 = MUMerArray[w].split("\t|\\s+");
@@ -1504,12 +1499,11 @@ class ReplaceIncludedEPGAcontigs {
 				writer.close();
 			}
 		}
-		int MergeNew=0;
 		Iterator<Integer> it = hashSet.iterator();
 		while (it.hasNext()) {
 			int SPAdesIndex = it.next();
 			FileWriter writer = new FileWriter(FinalEPGAcontigPath + "/ReplaceEPGAcontig." + DataName + ".fa", true);
-			writer.write(">Add:" + (MergeNew++) + "\n" + SPAdescontigArray[SPAdesIndex] + "\n");
+			writer.write(">Add:" + (SPAdesIndex) + "\n" + SPAdescontigArray[SPAdesIndex] + "\n");
 			writer.close();
 		}
 		//Free.
@@ -1806,52 +1800,6 @@ class breakErrorPoints {
         }
 	}
 }
-class MergeScaffolds {
-	public static void main(String[] args) throws IOException {
-		String ScaffoldPath=args[0];
-		String FinalEPGAScaffoldPath=args[1];
-		//Loading Scaffolds.
-		int SizeOfScaffoldFile=CommonClass.getFileLines(ScaffoldPath)/2;
-        String ScaffoldArray[]=new String[SizeOfScaffoldFile];
-        int RealSizeScaffoldArray=CommonClass.FastaToArray(ScaffoldPath,ScaffoldArray);
-        System.out.println("The real size of Scaffolds is:"+RealSizeScaffoldArray);
-		//Sort process.
-		String exch="";
-		for(int w=0;w<RealSizeScaffoldArray;w++)
-		{
-			for(int h=w+1;h<RealSizeScaffoldArray-1;h++)
-			{
-				if(ScaffoldArray[w].length()<ScaffoldArray[h].length())
-				{
-					exch=ScaffoldArray[w];
-					ScaffoldArray[w]=ScaffoldArray[h];
-					ScaffoldArray[h]=exch;
-				}
-			}
-		}
-		//Delete duplicate records.
-		for(int w=0;w<RealSizeScaffoldArray;w++)
-		{
-			for(int h=w+1;h<RealSizeScaffoldArray;h++)
-			{
-		       	if(ScaffoldArray[w].equals(ScaffoldArray[h])||ScaffoldArray[w].equals(CommonClass.reverse(ScaffoldArray[h])))
-				{
-					ScaffoldArray[h]="%"+ScaffoldArray[h];
-				}
-			}
-		}
-		int EPId=0;
-		for(int j=0;j<RealSizeScaffoldArray;j++)
-		{
-			if(ScaffoldArray[j].charAt(0)!='%')
-			{
-				 FileWriter writer = new FileWriter(FinalEPGAScaffoldPath + "/Final_EPGAScaffolds2.fa", true);
-			     writer.write(">" + (EPId++) + "\n" + ScaffoldArray[j] + "\n");
-			     writer.close();
-			}
-		}
-	}
-}
 //Pre_process.
 class GenerateScaffoldConfig{
 	public static void main(String[] args) throws IOException{
@@ -1859,15 +1807,47 @@ class GenerateScaffoldConfig{
 		String SSPACE_Path=args[1];
         String DataSetName=args[2];
 		String InsertSize=args[3];
+		int Trim_insertsize=Integer.parseInt(InsertSize);
 		String St_insertsize=args[4];
 		String ScaffoldConfigWrite="lib1 bwa "+HamePath+"/lib/"+DataSetName+"/HammerShort1.left.fasta   "+HamePath+"/lib/"+DataSetName+"/HammerShort1.right.fasta "+InsertSize+" "+St_insertsize+" "+"FR";
+		String ScaffoldConfigWrite2="lib2 bwa "+HamePath+"/lib/"+DataSetName+"/Trim_left.fa   "+HamePath+"/lib/"+DataSetName+"/Trim_right.fa "+(Trim_insertsize-50)+" "+St_insertsize+" "+"FR";
 		FileWriter writer= new FileWriter(SSPACE_Path+DataSetName+".txt",true);
-        writer.write(ScaffoldConfigWrite);
+        writer.write(ScaffoldConfigWrite+"\n"+ScaffoldConfigWrite2);
         writer.close();
 	}
 }
-public class Pre_process {
+//Pre_process.
+class splitFastaToSubfiles{
 	public static void main(String[] args) throws IOException{
-		
+		String NormalPath=args[0];
+		String WritePath=args[1];
+        //Loading.
+		int SizeOfNormal=CommonClass.getFileLines(NormalPath)/2;
+	    String NormalArray[]=new String[SizeOfNormal];
+	    int RealSizeOfNormal=CommonClass.FastaToArray(NormalPath,NormalArray); 
+	    System.out.println("The real size of NormalArray is:"+RealSizeOfNormal);
+        int Left_Count=0;
+		int Right_Count=0;
+		for(int w=0;w<RealSizeOfNormal;w++)
+		{
+			if(w%2==0)
+			{
+				FileWriter writer= new FileWriter(WritePath+"Trim_left.fa",true);
+                writer.write(">"+(Left_Count++)+"\n"+NormalArray[w]+"\n");
+                writer.close();
+			}
+			else
+			{
+				FileWriter writer= new FileWriter(WritePath+"Trim_right.fa",true);
+                writer.write(">"+(Right_Count++)+"\n"+NormalArray[w]+"\n");
+                writer.close();
+			}
+		}
+	}
+}
+//Pre_process.
+public class Pre_process {
+	public static void main(String[] args) {
+
 	}
 }

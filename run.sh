@@ -74,17 +74,14 @@ echo  "Step-0: System initialization"
 if [ ! -d $home/lib/ ];then
    mkdir $home/lib/
 fi
-#if [ ! -d $home/Quast_brakpoints/ ];then
-#   mkdir $home/Quast_brakpoints/
-#fi
+if [ ! -d $home/Quast_brakpoints/ ];then
+   mkdir $home/Quast_brakpoints/
+fi
 if [ ! -d $home/EPGA/ ];then
    mkdir $home/EPGA/
 fi
 if [ ! -d $home/spades/ ];then
    mkdir $home/spades/
-fi
-if [ ! -d $home/Final_Assemblies/ ];then
-   mkdir $home/Final_Assemblies/
 fi
 if [ ! -d $home/Auxiliary_lib ];then
    mkdir $home/Auxiliary_lib
@@ -117,8 +114,8 @@ fi
 if [ ! -d $home/lib/$DataSetName/ ];then
    mkdir $home/lib/$DataSetName/
 fi
-if [ ! -d $home/Final_Assemblies/$DataSetName/ ];then
-   mkdir $home/Final_Assemblies/$DataSetName/
+if [ ! -d $home/Quast_brakpoints/$DataSetName/ ];then
+   mkdir $home/Quast_brakpoints/$DataSetName/
 fi
 if [ ! -d $home/dsk/$DataSetName/ ];then
    mkdir $home/dsk/$DataSetName/
@@ -132,9 +129,6 @@ fi
 if [ ! -d $home/EPGA/$DataSetName/ ];then
    mkdir $home/EPGA/$DataSetName/
 fi
-#if [ ! -d $home/IDBA-UD/$DataSetName/ ];then
-#   mkdir $home/IDBA-UD/$DataSetName/
-#fi
 if [ ! -d $home/spades/$DataSetName/ ];then
    mkdir $home/spades/$DataSetName/ 
 fi
@@ -235,7 +229,10 @@ rm -rf $home/lib/$DataSetName/LowDepthFasta.fasta
 rm -rf $home/lib/$DataSetName/NormalDepthFasta.fasta
 rm -rf $home/lib/$DataSetName/LowDepthFastq.fastq
 rm -rf $home/lib/$DataSetName/NormalDepthFastq.fastq
+rm -rf $home/lib/$DataSetName/Trim_left.fa
+rm -rf $home/lib/$DataSetName/Trim_right.fa
 java -classpath  $home/Program/ FilterLowDepthReads2 $home/lib/$DataSetName/ $Trim_Size
+java -classpath  $home/Program/ splitFastaToSubfiles $home/lib/$DataSetName/NormalDepthFasta.fasta  $home/lib/$DataSetName/
 echo  "Step-10: SPAdes assembly"
 spades.py --pe1-1 $home/lib/$DataSetName/$lib1_left_name.corr.fastq --pe1-2 $home/lib/$DataSetName/$lib1_right_name.corr.fastq --sc --careful -o $home/spades/$DataSetName/ > $home/Log/$DataSetName/running/out.log
 quast.py $home/spades/$DataSetName/contigs.fasta $home/spades/$DataSetName/scaffolds.fasta -R $home/Reference/$ReferenceName -o $home/spades/$DataSetName/quast > $home/Log/$DataSetName/running/out.log
@@ -265,39 +262,32 @@ rm -rf $home/QSstatistics/$DataSetName/*
 java  -classpath  $home/Program/ QSstatistics $home/lib/$DataSetName/LowDepthFastq.fastq  $home/QSstatistics/$DataSetName/
 rm -rf $home/lib/$DataSetName/LowDepthFastq_Filter.fastq
 java  -classpath  $home/Program/ QualityControl  $home/QSstatistics/$DataSetName/QSFile.fa $home/lib/$DataSetName/LowDepthFastq.fastq  $home/lib/$DataSetName/LowDepthFastq_Filter.fastq $FilterTHLow
-echo  "Step-13: Generate final low depth fasta file"
-rm -rf $home/lib/$DataSetName/LowDepth_Trimed.fasta
-java  -classpath  $home/Program/ GenerateFinalLowDepthFasta $home/lib/$DataSetName/LowDepthFastq_Filter.fastq $home/lib/$DataSetName/
-#echo  "Step-14: Low depth read assembly"
-#cd $home/EPGA/$DataSetName/low/
-#rm -rf $home/EPGA/$DataSetName/low/*
-#epga  $home/lib/$DataSetName/LowDepth_Trimed.fasta $InsertLength1 $Sd_insert $KmerSize_Low 24
-echo  "Step-14: Normal depth read assembly [EPGA]"
+echo  "Step-13: Normal depth read assembly"
 cd $home/EPGA/$DataSetName/after/
 rm -rf $home/EPGA/$DataSetName/after/*
 epga  $home/lib/$DataSetName/NormalDepthFasta.fasta $InsertLength1 $Sd_insert $home/lib/$DataSetName/Auxiliary500.fasta 500 50 $home/lib/$DataSetName/Auxiliary700.fasta 700 70 $home/lib/$DataSetName/Auxiliary900.fasta 900 90 $home/lib/$DataSetName/Auxiliary1500.fasta 1500 150 $home/lib/$DataSetName/Auxiliary2500.fasta 2500 250 $home/lib/$DataSetName/Auxiliary5000.fasta 5000 500 $home/lib/$DataSetName/Auxiliary7500.fasta 7500 750 $KmerSize_Normal 72
-echo  "Step-15: Change lines"
+echo  "Step-14: Change lines"
 rm -rf $home/MUM/$DataSetName/*
 rm -rf $home/spades/$DataSetName/contig.$DataSetName.changgeLines.fa
 java -classpath  $home/Program/ ChangeLines $home/spades/$DataSetName/ $home/spades/$DataSetName/scaffolds.fasta $DataSetName
-echo  "Step-16: MUMmer algnment [spades->epga]"
+echo  "Step-15: MUMmer algnment [spades->epga]"
 rm -rf  $home/EPGA/$DataSetName/afterfilter/*
 nucmer -c 50 -p $home/MUM/$DataSetName/liaoxingyu_nucmer1 $home/EPGA/$DataSetName/after/scaffoldLong.fa $home/spades/$DataSetName/contig.$DataSetName.changgeLines.fa
-delta-filter -i 70 -q -r $home/MUM/$DataSetName/liaoxingyu_nucmer1.delta > $home/MUM/$DataSetName/liaoxingyu_filter1
+delta-filter -i 100 -q -r $home/MUM/$DataSetName/liaoxingyu_nucmer1.delta > $home/MUM/$DataSetName/liaoxingyu_filter1
 show-coords -dTlro $home/MUM/$DataSetName/liaoxingyu_filter1 > $home/MUM/$DataSetName/reference_nucmer_out_coords1.txt
-echo  "Step-17: Error break [epga contigs]"
+echo  "Step-16: Error break [epga contigs]"
 rm -rf $home/EPGA/$DataSetName/after/EPGA_BreakErrorPoints.fa
-java -classpath  $home/Program/ breakErrorPoints $home/MUM/$DataSetName/reference_nucmer_out_coords1.txt $home/EPGA/$DataSetName/after/scaffoldLong.fa $home/spades/$DataSetName/contig.$DataSetName.changgeLines.fa  $home/EPGA/$DataSetName/after/  31
-echo  "Step-18: MUMmer algnment [spades->epga_error_free]"
+java -classpath  $home/Program/ breakErrorPoints $home/MUM/$DataSetName/reference_nucmer_out_coords1.txt $home/EPGA/$DataSetName/after/scaffoldLong.fa $home/spades/$DataSetName/contig.$DataSetName.changgeLines.fa  $home/EPGA/$DataSetName/after/  50
+echo  "Step-17: MUMmer algnment [spades->epga_error_free]"
 rm -rf  $home/EPGA/$DataSetName/afterfilter/*
 nucmer -c 50 -p $home/MUM/$DataSetName/liaoxingyu_nucmer2 $home/spades/$DataSetName/contig.$DataSetName.changgeLines.fa $home/EPGA/$DataSetName/after/EPGA_BreakErrorPoints.fa
 delta-filter -i 100 -q -r $home/MUM/$DataSetName/liaoxingyu_nucmer2.delta > $home/MUM/$DataSetName/liaoxingyu_filter2
 show-coords -dTlro $home/MUM/$DataSetName/liaoxingyu_filter2 > $home/MUM/$DataSetName/reference_nucmer_out_coords2.txt
-echo  "Step-19: Extension Short EPGA contigs by using long SPAdes contigs"
+echo  "Step-18: Replace Short EPGA contigs with long SPAdes contigs"
 rm -rf $home/EPGA/$DataSetName/after/ReplaceEPGAcontig.*
 rm -rf $home/EPGA/$DataSetName/after/FreeSPAdesContig.$DataSetName.fa
 java -classpath  $home/Program/ ReplaceIncludedEPGAcontigs $home/MUM/$DataSetName/reference_nucmer_out_coords2.txt $home/EPGA/$DataSetName/after/EPGA_BreakErrorPoints.fa $home/spades/$DataSetName/contig.$DataSetName.changgeLines.fa $DataSetName $home/EPGA/$DataSetName/after/
-echo  "Step-20: Merging Complementary contigs"
+echo  "Step-19: Merging Complementary contigs"
 cd $home/EPGA/$DataSetName/after/
 rm -rf $home/EPGA/$DataSetName/after/SpadesUnmapped2EPGAcontigs.fa
 rm -rf $home/MUM/$DataSetName/Spades2EPGAerrorfree.sam
@@ -306,7 +296,7 @@ bwa mem -t 48 -x intractg $home/EPGA/$DataSetName/after/ReplaceEPGAcontig.$DataS
 samtools fasta -f 4 -0 $home/EPGA/$DataSetName/after/SpadesUnmapped2EPGAcontigs.fa $home/MUM/$DataSetName/Spades2EPGAerrorfree.sam 
 rm -rf $home/EPGA/$DataSetName/afterfilter/FinalContig_AfterMergeCompContigs.fa
 java  -classpath  $home/Program/ MergeCompContigs $home/EPGA/$DataSetName/afterfilter/ $home/EPGA/$DataSetName/after/ReplaceEPGAcontig.$DataSetName.fa $home/EPGA/$DataSetName/after/SpadesUnmapped2EPGAcontigs.fa
-echo  "Step-21: SSPACE Scaffolding"
+echo  "Step-20: SSPACE Scaffolding"
 cd $home/SSPACE-STANDARD-3.0_linux-x86_64
 rm -rf *.fa
 rm -rf $home/SSPACE-STANDARD-3.0_linux-x86_64/scaffolds_sspace/*
@@ -320,10 +310,4 @@ cp $home/EPGA/$DataSetName/afterfilter/FinalContig_AfterMergeCompContigs.fa $hom
 perl SSPACE_Standard_v3.0.pl -l ./$DataSetName.txt -s ./EPGA_FinalContig.fasta -b ./scaffolds_sspace  -T 64
 cp $home/SSPACE-STANDARD-3.0_linux-x86_64/EPGA_FinalContig.fasta $home/EPGA/$DataSetName/afterfilter/EPGA_FinalContig2.fasta
 cp $home/SSPACE-STANDARD-3.0_linux-x86_64/scaffolds_sspace/scaffolds_sspace.final.scaffolds.fasta $home/EPGA/$DataSetName/afterfilter/EPGA_FinalScaffold2.fasta
-java -classpath  $home/Program/ ChangeLines $home/EPGA/$DataSetName/afterfilter/ $home/EPGA/$DataSetName/afterfilter/EPGA_FinalScaffold2.fasta $DataSetName
-java  -classpath  $home/Program/ MergeScaffolds $home/EPGA/$DataSetName/afterfilter/contig.$DataSetName.changgeLines.fa $home/EPGA/$DataSetName/afterfilter/
-echo  "Step-22: Quast evalution"
-quast.py $home/spades/$DataSetName/contigs.fasta $home/spades/$DataSetName/scaffolds.fasta $home/EPGA/$DataSetName/after/scaffoldLong.fa $home/EPGA/$DataSetName/after/EPGA_BreakErrorPoints.fa $home/EPGA/$DataSetName/after/ReplaceEPGAcontig.$DataSetName.fa $home/EPGA/$DataSetName/afterfilter/FinalContig_AfterMergeCompContigs.fa $home/EPGA/$DataSetName/afterfilter/EPGA_FinalContig2.fasta $home/EPGA/$DataSetName/afterfilter/Final_EPGAScaffolds2.fa -m 500 -R $ReferenceName -o $home/Quast/$DataSetName/
-cp $home/EPGA/$DataSetName/afterfilter/EPGA_FinalContig2.fasta $home/Final_Assemblies/$DataSetName/Contigs.fa
-cp $home/EPGA/$DataSetName/afterfilter/Final_EPGAScaffolds2.fa $home/Final_Assemblies/$DataSetName/Scaffolds.fa
-echo  "Step-23: EPGA-SC assembly completed successfully. Thank you!"
+quast.py $home/spades/$DataSetName/contigs.fasta $home/spades/$DataSetName/scaffolds.fasta $home/EPGA/$DataSetName/after/scaffoldLong.fa $home/EPGA/$DataSetName/after/EPGA_BreakErrorPoints.fa $home/EPGA/$DataSetName/after/ReplaceEPGAcontig.$DataSetName.fa $home/EPGA/$DataSetName/afterfilter/FinalContig_AfterMergeCompContigs.fa $home/EPGA/$DataSetName/afterfilter/EPGA_FinalContig2.fasta $home/EPGA/$DataSetName/afterfilter/EPGA_FinalScaffold2.fasta -m 500 -R $ReferenceName -o $home/Quast/$DataSetName/
